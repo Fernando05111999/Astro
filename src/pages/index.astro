@@ -1,7 +1,158 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-const pageTitle = "Página de inicio";
+import Layout from '../layouts/Layout.astro';
 ---
-<BaseLayout pageTitle={pageTitle}>
-  <h2>Mi impresionante subtítulo del blog</h2>
-</BaseLayout>
+
+<Layout title="Munay Puna - Inicio">
+    <!-- SLIDER INSIGNIA -->
+    <div class="carousel">
+        <div class="list">
+            
+            <div class="item">
+                <img src="/img/yavi.jpg" alt="Yavi">
+                <div class="content">
+                    <div class="author">FRONTERA NORTE</div>
+                    <div class="title">YAVI</div>
+                    <div class="topic">CUNA DE HISTORIA</div>
+                    <div class="des">Donde el tiempo se detuvo en el siglo XVII. Descubre la Casa del Marqués de Tojo y una iglesia consagrada en oro, en un oasis verde rodeado por la aridez de la frontera.</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <img src="/img/susques.png" alt="Susques">
+                <div class="content">
+                    <div class="author">PÓRTICO DE LOS ANDES</div>
+                    <div class="title">SUSQUES</div>
+                    <div class="topic">GUARDIÁN DE SAL</div>
+                    <div class="des">El pueblo más alto de Argentina te recibe con su capilla de adobe y techo de cardón. La puerta de entrada a la inmensidad blanca de las Salinas Grandes y al Paso de Jama.</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <img src="/img/huancar.jpg" alt="Huancar">
+                <div class="content">
+                    <div class="author">ABRA PAMPA</div>
+                    <div class="title">EL HUANCAR</div>
+                    <div class="topic">DUNAS MÍSTICAS</div>
+                    <div class="des">A los pies de la "Siberia Argentina", desafía la gravedad en arenas que cantan. El escenario perfecto para el sandboard y para conectar con la energía de la tierra a 3500 msnm.</div>
+                </div>
+            </div>
+
+            <div class="item">
+                <img src="/img/fondo3.jpg" alt="Puna Jujeña">
+                <div class="content">
+                    <div class="author">JUJUY AL LÍMITE</div>
+                    <div class="title">PUNA</div>
+                    <div class="topic">INFINITA</div>
+                    <div class="des">Desde Santa Catalina hasta Catua, pasando por la mística Rinconada. Recorre caminos de silencio, vicuñas salvajes y cielos nocturnos que tocan la tierra. La aventura definitiva.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="thumbnail">
+            <div class="item"><img src="/img/susques.png" alt="Susques"><div class="content"><div class="title">Susques</div></div></div>
+            <div class="item"><img src="/img/huancar.jpg" alt="Huancar"><div class="content"><div class="title">Huancar</div></div></div>
+            <div class="item"><img src="/img/fondo3.jpg" alt="Puna"><div class="content"><div class="title">Puna Profunda</div></div></div>
+            <div class="item"><img src="/img/yavi.jpg" alt="Yavi"><div class="content"><div class="title">Yavi</div></div></div>
+        </div>
+
+        <div class="arrows">
+            <button id="prev">&lt;</button>
+            <button id="next">&gt;</button>
+        </div>
+        <div class="time"></div>
+    </div>
+</Layout>
+
+<script>
+    // Lógica específica del slider
+    const nextDom = document.getElementById('next');
+    const prevDom = document.getElementById('prev');
+    const carouselDom = document.querySelector('.carousel');
+    const SliderDom = carouselDom?.querySelector('.list');
+    const thumbnailBorderDom = document.querySelector('.thumbnail');
+    
+    if(nextDom && prevDom && carouselDom && SliderDom && thumbnailBorderDom) {
+        const thumbnailItemsDom = thumbnailBorderDom.querySelectorAll('.item');
+        thumbnailBorderDom.appendChild(thumbnailItemsDom[0]);
+        
+        let timeRunning = 3000;
+        let timeAutoNext = 7000;
+        let runTimeOut: number;
+
+        nextDom.addEventListener('click', () => showSlider('next'));
+        prevDom.addEventListener('click', () => showSlider('prev'));
+
+        let runNextAuto = setTimeout(() => { (nextDom as HTMLButtonElement).click(); }, timeAutoNext);
+
+        function showSlider(type: string){
+            let SliderItemsDom = SliderDom!.querySelectorAll('.item');
+            let thumbnailItemsDom = document.querySelectorAll('.carousel .thumbnail .item');
+            
+            if(type === 'next'){
+                SliderDom!.appendChild(SliderItemsDom[0]);
+                thumbnailBorderDom!.appendChild(thumbnailItemsDom[0]);
+                carouselDom!.classList.add('next');
+            }else{
+                SliderDom!.prepend(SliderItemsDom[SliderItemsDom.length - 1]);
+                thumbnailBorderDom!.prepend(thumbnailItemsDom[thumbnailItemsDom.length - 1]);
+                carouselDom!.classList.add('prev');
+            }
+            clearTimeout(runTimeOut);
+            runTimeOut = setTimeout(() => {
+                carouselDom!.classList.remove('next');
+                carouselDom!.classList.remove('prev');
+            }, timeRunning);
+
+            clearTimeout(runNextAuto);
+            runNextAuto = setTimeout(() => { (nextDom as HTMLButtonElement).click(); }, timeAutoNext)
+        }
+    }
+</script>
+
+<style>
+    /* ESTILOS EXCLUSIVOS DEL CARRUSEL */
+    .carousel { height: 100vh; width: 100vw; overflow: hidden; position: relative; }
+    .carousel .list .item { width: 100%; height: 100%; position: absolute; inset: 0; }
+    .carousel .list .item img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65); }
+    .carousel .list .item .content { position: absolute; top: 20%; width: 1140px; max-width: 80%; left: 50%; transform: translateX(-50%); padding-right: 30%; box-sizing: border-box; color: #fff; text-shadow: 0 5px 10px rgba(0,0,0,0.4); z-index: 2; display: none; }
+    .carousel .list .item:nth-child(1) .content { display: block; }
+    .carousel .list .item .author { font-family: 'Oswald', sans-serif; font-weight: bold; letter-spacing: 5px; color: var(--accent-cyan); margin-bottom: 10px; }
+    .carousel .list .item .title, .carousel .list .item .topic { font-family: 'Oswald', sans-serif; font-weight: bold; font-size: 5em; line-height: 1em; text-transform: uppercase; }
+    .carousel .list .item .topic { color: var(--accent-cyan); -webkit-text-fill-color: transparent; -webkit-text-stroke: 1px var(--accent-cyan); margin-bottom: 20px; }
+    .carousel .list .item .des { font-size: 1.1em; line-height: 1.6; max-width: 600px; margin-bottom: 30px; border-left: 3px solid var(--accent-cyan); padding-left: 20px; background: linear-gradient(90deg, rgba(0,0,0,0.5) 0%, transparent 100%); }
+    
+    .thumbnail { position: absolute; bottom: 50px; left: 50%; width: max-content; z-index: 100; display: flex; gap: 20px; }
+    .thumbnail .item { width: 150px; height: 220px; flex-shrink: 0; position: relative; cursor: pointer; border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); transition: 0.5s; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    .thumbnail .item:hover { transform: translateY(-10px); border-color: var(--accent-cyan); }
+    .thumbnail .item img { width: 100%; height: 100%; object-fit: cover; }
+    .thumbnail .item .content { color: #fff; position: absolute; bottom: 10px; left: 10px; right: 10px; font-family: 'Oswald', sans-serif; }
+    .thumbnail .item .content .title { font-weight: 500; font-size: 14px; text-shadow: 0 2px 4px rgba(0,0,0,0.9); }
+    
+    .arrows { position: absolute; top: 80%; right: 52%; z-index: 100; width: 300px; max-width: 30%; display: flex; gap: 10px; align-items: center; }
+    .arrows button { width: 50px; height: 50px; border-radius: 50%; background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-family: monospace; font-weight: bold; transition: .5s; cursor: pointer; backdrop-filter: blur(5px); }
+    .arrows button:hover { background-color: var(--accent-cyan); color: #000; border-color: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-glow); }
+
+    .carousel .list .item:nth-child(1) { z-index: 1; }
+    .carousel .list .item:nth-child(1) .content .author, .carousel .list .item:nth-child(1) .content .title, .carousel .list .item:nth-child(1) .content .topic, .carousel .list .item:nth-child(1) .content .des { transform: translateY(50px); filter: blur(20px); opacity: 0; animation: showContent .5s 1s linear 1 forwards; }
+    @keyframes showContent { to { transform: translateY(0); filter: blur(0); opacity: 1; } }
+    .carousel .list .item:nth-child(1) .content .title { animation-delay: 1.2s !important; }
+    .carousel .list .item:nth-child(1) .content .topic { animation-delay: 1.4s !important; }
+    .carousel .list .item:nth-child(1) .content .des { animation-delay: 1.6s !important; }
+    
+    .carousel.next .list .item:nth-child(1) img { width: 150px; height: 220px; position: absolute; bottom: 50px; left: 50%; border-radius: 30px; animation: showImage .5s linear 1 forwards; }
+    @keyframes showImage { to { bottom: 0; left: 0; width: 100%; height: 100%; border-radius: 0; } }
+    .carousel.next .thumbnail .item:nth-last-child(1) { overflow: hidden; animation: showThumbnail .5s linear 1 forwards; }
+    .carousel.prev .list .item img { z-index: 100; }
+    @keyframes showThumbnail { from { width: 0; opacity: 0; } }
+    .carousel.next .thumbnail { animation: effectNext .5s linear 1 forwards; }
+    @keyframes effectNext { from { transform: translateX(150px); } }
+
+    @media screen and (max-width: 678px) {
+        .carousel .list .item .content { padding-right: 0; top: 15%; }
+        .carousel .list .item .content .title, .carousel .list .item .content .topic { font-size: 30px; }
+        .carousel .list .item .content .des { font-size: 0.9rem; max-width: 100%; padding-right: 20px;}
+        .thumbnail { bottom: 100px; } 
+        .thumbnail .item { width: 100px; height: 150px; }
+        .arrows { top: 85%; right: auto; left: 50%; transform: translateX(-50%); }
+    }
+</style>
