@@ -1,0 +1,107 @@
+---
+// src/components/ChatWidget.astro
+---
+<div id="munay-chat-widget">
+    <button id="chat-toggle-btn"><i class="bi bi-chat-dots-fill"></i></button>
+    <div id="chat-window" class="chat-hidden">
+        <div class="chat-header">
+            <div class="chat-title"><i class="bi bi-stars"></i> Asistente Puna</div>
+            <button class="chat-close" id="chat-close-btn"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div id="chat-messages" class="chat-body">
+            <div class="message bot-message">¡Hola! Soy el asistente virtual de Munay Puna 🌵 ¿En qué puedo ayudarte hoy?</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="Pregunta algo sobre la Puna...">
+            <button id="send-btn"><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+</div>
+
+<style>
+    #munay-chat-widget { position: fixed; bottom: 25px; right: 25px; z-index: 9999; font-family: 'Montserrat', sans-serif; }
+    #chat-toggle-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(11, 11, 11, 0.9); border: 2px solid var(--accent-cyan); color: var(--accent-cyan); font-size: 24px; cursor: pointer; box-shadow: 0 0 15px var(--accent-glow); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+    #chat-toggle-btn:hover { background: var(--accent-cyan); color: #000; transform: scale(1.1); }
+    #chat-window { position: absolute; bottom: 80px; right: 0; width: 350px; height: 450px; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.7); transition: 0.3s; transform-origin: bottom right; }
+    .chat-hidden { opacity: 0; transform: scale(0); pointer-events: none; }
+    .chat-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--accent-cyan); display: flex; justify-content: space-between; align-items: center; }
+    .chat-title { font-family: 'Oswald', sans-serif; color: #fff; gap: 8px; display: flex; }
+    .chat-title i { color: var(--accent-cyan); }
+    .chat-close { background: none; border: none; color: #888; cursor: pointer; }
+    .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+    .message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; }
+    .bot-message { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--accent-cyan); color: #eee; align-self: flex-start; }
+    .user-message { background: var(--accent-cyan); color: #000; align-self: flex-end; font-weight: 500; }
+    .chat-input-area { padding: 15px; background: #080808; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+    #user-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 20px; padding: 10px 15px; color: #fff; outline: none; }
+    #user-input:focus { border-color: var(--accent-cyan); }
+    #send-btn { background: transparent; border: none; color: var(--accent-cyan); font-size: 1.2rem; cursor: pointer; }
+    @media(max-width: 480px){ #chat-window { width: 300px; right: -10px; }}
+</style>
+
+<script>
+    const toggleBtn = document.getElementById('chat-toggle-btn') as HTMLButtonElement;
+    const closeBtn = document.getElementById('chat-close-btn') as HTMLButtonElement;
+    const sendBtn = document.getElementById('send-btn') as HTMLButtonElement;
+    // Aquí le decimos específicamente que es un INPUT
+    const userInput = document.getElementById('user-input') as HTMLInputElement;
+    const chatWindow = document.getElementById('chat-window') as HTMLElement;
+    
+    function toggleChat() {
+        chatWindow.classList.toggle('chat-hidden');
+        if (!chatWindow.classList.contains('chat-hidden')) userInput.focus();
+    }
+
+    toggleBtn.addEventListener('click', toggleChat);
+    closeBtn.addEventListener('click', toggleChat);
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+    sendBtn.addEventListener('click', sendMessage);
+
+    // Definimos explícitamente el tipo de arreglo
+    let chatHistory: any[] = [];
+    const systemContext = `Eres el asistente de Munay Puna. Responde breve y amable sobre turismo en Jujuy (Puna). No uses markdown ni símbolos raros.`;
+    
+    async function sendMessage() {
+        const msg = userInput.value.trim();
+        const chatBody = document.getElementById('chat-messages') as HTMLElement;
+        if (!msg) return;
+
+        const userDiv = document.createElement('div'); 
+        userDiv.className = 'message user-message'; 
+        userDiv.innerText = msg;
+        chatBody.appendChild(userDiv); 
+        chatBody.scrollTop = chatBody.scrollHeight;
+        userInput.value = '';
+        chatHistory.push({ role: "user", parts: [{ text: msg }] });
+
+        const loadDiv = document.createElement('div'); 
+        loadDiv.className = 'message bot-message'; 
+        loadDiv.innerText = '...'; 
+        loadDiv.id = 'loading';
+        chatBody.appendChild(loadDiv);
+
+        try {
+            const apiKey = ""; // API KEY VA AQUI 
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const resp = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ contents: chatHistory, systemInstruction: { parts: [{ text: systemContext }] } }) });
+            const data = await resp.json();
+            
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) loadingElement.remove();
+            
+            const botText = data.candidates[0].content.parts[0].text.replace(/[*#]/g, '');
+            const botDiv = document.createElement('div'); 
+            botDiv.className = 'message bot-message'; 
+            botDiv.innerText = botText;
+            chatBody.appendChild(botDiv);
+            chatHistory.push({ role: "model", parts: [{ text: botText }] });
+        } catch (e) {
+            const loadingElement = document.getElementById('loading');
+            if (loadingElement) loadingElement.remove();
+            const errDiv = document.createElement('div'); 
+            errDiv.className = 'message bot-message'; 
+            errDiv.innerText = 'Lo siento, error de conexión.';
+            chatBody.appendChild(errDiv);
+        }
+    }
+</script>

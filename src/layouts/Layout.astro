@@ -1,14 +1,10 @@
 ---
+// src/layouts/Layout.astro
 interface Props {
 	title: string;
 }
 
 const { title } = Astro.props;
-
-// En Astro, el estado de sesión dependerá de si usas SSR (Server Side Rendering) o CSR. 
-// Por ahora, simulamos las variables que tenías en Flask para la UI:
-const isLoggedIn = false; 
-const username = "Viajero";
 ---
 
 <!DOCTYPE html>
@@ -16,8 +12,8 @@ const username = "Viajero";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
-    <!-- Los archivos estáticos van en la carpeta /public de Astro -->
+    <title>{title} | Munay Puna</title>
+    <!-- Asegúrate de colocar tu logo.png dentro de la carpeta public/img/ -->
     <link rel="icon" type="image/png" href="/img/logo.png">
     
     <!-- FUENTES -->
@@ -27,161 +23,13 @@ const username = "Viajero";
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
-
-    <!-- HEADER -->
-    <header>
-        <nav>
-            <a href="/" style="color: var(--accent-cyan);">
-                <i class="bi bi-house-door-fill"></i> <b>INICIO</b>
-            </a>
-            <a href="/lugares">
-                <i class="bi bi-geo-alt-fill"></i> <b>LUGARES</b>
-            </a>
-            <a href="/servicios">
-                <i class="bi bi-ticket-perforated-fill"></i> <b>SERVICIOS</b>
-            </a>
-            <a href="/explorar">
-                <i class="bi bi-compass-fill"></i> <b>EXPLORAR</b>
-            </a>
-            <a href="/sobrelapuna">
-                <i class="bi bi-journal-text"></i> <b>SOBRE LA PUNA</b>
-            </a>
-            <a href="/galeria">
-                <i class="bi bi-images"></i> <b>GALERIA</b>
-            </a>
-        </nav>
-
-        <!-- Lógica condicional de Login estilo Astro -->
-        {isLoggedIn ? (
-            <div class="user-actions">
-                <span class="username">Hola, {username}</span>
-                <a href="/logout" class="logout-link">
-                    <i class="bi bi-box-arrow-right"></i> SALIR
-                </a>
-            </div>
-        ) : (
-            <a href="/login" class="login-link">
-                <i class="bi bi-person-fill"></i> <b>INICIAR SESIÓN</b>
-            </a>
-        )}
-    </header>
-
-    <!-- AQUÍ SE INYECTARÁ EL CONTENIDO DE CADA PÁGINA -->
+    <!-- Aquí se inyectará el contenido de cada página -->
     <slot />
-
-    <!-- FOOTER -->
-    <footer class="pie1">
-      <div class="redes">
-        <a href="https://wa.me/543884554173" target="_blank" rel="noopener"><img src="/img/whatsapp.png" alt="Whatsapp"></a>
-        <a href="https://www.instagram.com/fernando_tejerina_vilca?igsh=eGc2dTl1YjY3eW44" target="_blank" rel="noopener"><img src="/img/instagram.png" alt="Instagram"></a>
-        <a href="https://x.com/fernando6507995" target="_blank" rel="noopener"><img src="/img/x.png" alt="X"></a>
-        <a href="https://www.facebook.com/Fernando.Vilca009/" target="_blank" rel="noopener"><img src="/img/facebook.png" alt="Facebook"></a>
-      </div>
-      <div class="derechos">
-        <p>&copy; 2026 | Munay Puna. Todos los derechos reservados.</p>
-      </div>
-    </footer>
-
-    <!-- WIDGET CHAT -->
-    <div id="munay-chat-widget">
-        <button id="chat-toggle-btn"><i class="bi bi-chat-dots-fill"></i></button>
-        <div id="chat-window" class="chat-hidden">
-            <div class="chat-header">
-                <div class="chat-title"><i class="bi bi-stars"></i> Asistente Puna</div>
-                <button class="chat-close"><i class="bi bi-x-lg"></i></button>
-            </div>
-            <div id="chat-messages" class="chat-body">
-                <div class="message bot-message">¡Hola! Soy el asistente virtual de Munay Puna 🌵 ¿En qué puedo ayudarte hoy?</div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="user-input" placeholder="Pregunta algo sobre la Puna...">
-                <button id="send-btn"><i class="bi bi-send-fill"></i></button>
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>
 
-<!-- LÓGICA DEL CHAT -->
-<script>
-    // En Astro, es mejor usar EventListeners en lugar de onclick="" en el HTML
-    const toggleBtn = document.getElementById('chat-toggle-btn');
-    const closeBtn = document.querySelector('.chat-close');
-    const chatWindow = document.getElementById('chat-window');
-    const userInput = document.getElementById('user-input') as HTMLInputElement;
-    const sendBtn = document.getElementById('send-btn');
-    const chatBody = document.getElementById('chat-messages');
-
-    if (toggleBtn) toggleBtn.addEventListener('click', toggleChat);
-    if (closeBtn) closeBtn.addEventListener('click', toggleChat);
-    if (userInput) userInput.addEventListener('keypress', handleKeyPress);
-    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
-
-    function toggleChat() {
-        if(chatWindow) {
-            chatWindow.classList.toggle('chat-hidden');
-            if (!chatWindow.classList.contains('chat-hidden') && userInput) userInput.focus();
-        }
-    }
-
-    function handleKeyPress(e: KeyboardEvent) { 
-        if (e.key === 'Enter') sendMessage(); 
-    }
-
-    let chatHistory: any[] = [];
-    const systemContext = `Eres el asistente de Munay Puna. Responde breve y amable sobre turismo en Jujuy (Puna). No uses markdown ni símbolos raros.`;
-    
-    async function sendMessage() {
-        if (!userInput || !chatBody) return;
-        const msg = userInput.value.trim();
-        if (!msg) return;
-
-        const userDiv = document.createElement('div'); 
-        userDiv.className = 'message user-message'; 
-        userDiv.innerText = msg;
-        chatBody.appendChild(userDiv); 
-        chatBody.scrollTop = chatBody.scrollHeight;
-        userInput.value = '';
-
-        chatHistory.push({ role: "user", parts: [{ text: msg }] });
-
-        const loadDiv = document.createElement('div'); 
-        loadDiv.className = 'message bot-message'; 
-        loadDiv.innerText = '...'; 
-        loadDiv.id = 'loading';
-        chatBody.appendChild(loadDiv);
-
-        try {
-            const apiKey = ""; // API KEY VA AQUI
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const resp = await fetch(url, { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ contents: chatHistory, systemInstruction: { parts: [{ text: systemContext }] } }) 
-            });
-            const data = await resp.json();
-            document.getElementById('loading')?.remove();
-            
-            const botText = data.candidates[0].content.parts[0].text.replace(/[*#]/g, '');
-            const botDiv = document.createElement('div'); 
-            botDiv.className = 'message bot-message'; 
-            botDiv.innerText = botText;
-            chatBody.appendChild(botDiv);
-            chatHistory.push({ role: "model", parts: [{ text: botText }] });
-        } catch (e) {
-            document.getElementById('loading')?.remove();
-            const errDiv = document.createElement('div'); 
-            errDiv.className = 'message bot-message'; 
-            errDiv.innerText = 'Lo siento, error de conexión.';
-            chatBody.appendChild(errDiv);
-        }
-    }
-</script>
-
-<!-- ESTILOS GLOBALES -->
 <style is:global>
-    /* VARIABLES GLOBALES Y RESET */
+    /* --- VARIABLES GLOBALES Y RESET --- */
     :root {
         --primary-bg: #0b0b0b;
         --secondary-bg: #141414;
@@ -192,7 +40,12 @@ const username = "Viajero";
         --border-color: rgba(255, 255, 255, 0.1);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; text-decoration: none; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-decoration: none;
+    }
 
     body {
         background-color: #000;
@@ -203,71 +56,4 @@ const username = "Viajero";
         display: flex;
         flex-direction: column;
     }
-
-    /* HEADER */
-    header {
-        width: 100%; height: 80px; background-color: rgba(11, 11, 11, 0.9);
-        backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color);
-        padding: 0 50px; display: flex; justify-content: space-between;
-        align-items: center; position: fixed; top: 0; z-index: 1000;
-    }
-    header nav { display: flex; gap: 30px; }
-    header a {
-        color: var(--text-muted); font-family: 'Oswald', sans-serif;
-        font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 8px;
-        text-transform: uppercase; letter-spacing: 1.5px; position: relative; transition: 0.3s;
-    }
-    header nav a:hover { color: var(--accent-cyan); text-shadow: 0 0 8px var(--accent-glow); }
-    header nav a::after {
-        content: ''; position: absolute; bottom: -5px; left: 0;
-        width: 0; height: 2px; background: var(--accent-cyan); transition: width 0.3s ease;
-    }
-    header nav a:hover::after { width: 100%; }
-    
-    .login-link, .logout-link {
-        border: 1px solid var(--border-color); padding: 8px 20px; border-radius: 4px;
-        background: rgba(255,255,255,0.03); color: var(--text-muted);
-    }
-    .login-link:hover, .logout-link:hover {
-        background: var(--accent-cyan); color: #000 !important;
-        border-color: var(--accent-cyan); box-shadow: 0 0 15px var(--accent-glow);
-    }
-    .user-actions { display: flex; align-items: center; gap: 15px; }
-    .username { font-family: 'Oswald', sans-serif; font-weight: 300; font-size: 0.9rem; }
-
-    /* FOOTER */
-    .pie1 {
-        background-color: #080808; border-top: 1px solid var(--border-color);
-        padding: 1.5rem 3rem; display: flex; flex-wrap: wrap;
-        justify-content: space-between; align-items: center; position: relative; z-index: 10;
-    }
-    .redes { display: flex; align-items: center; gap: 25px; }
-    .redes img { width: 28px; height: 28px; object-fit: contain; filter: grayscale(100%) brightness(1.5); opacity: 0.7; transition: 0.3s; }
-    .redes a:hover img { transform: scale(1.2) rotate(10deg); filter: grayscale(0%) drop-shadow(0 0 5px var(--accent-cyan)); opacity: 1; }
-    .derechos p { margin: 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
-
-    /* CHAT WIDGET */
-    #munay-chat-widget { position: fixed; bottom: 25px; right: 25px; z-index: 9999; font-family: 'Montserrat', sans-serif; }
-    #chat-toggle-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(11, 11, 11, 0.9); border: 2px solid var(--accent-cyan); color: var(--accent-cyan); font-size: 24px; cursor: pointer; box-shadow: 0 0 15px var(--accent-glow); transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-    #chat-toggle-btn:hover { background: var(--accent-cyan); color: #000; transform: scale(1.1); }
-    #chat-window { position: absolute; bottom: 80px; right: 0; width: 350px; height: 450px; background: rgba(15, 15, 15, 0.95); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 15px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0,0,0,0.7); transition: 0.3s; transform-origin: bottom right; }
-    .chat-hidden { opacity: 0; transform: scale(0); pointer-events: none; }
-    .chat-header { background: #080808; padding: 15px; border-bottom: 1px solid var(--accent-cyan); display: flex; justify-content: space-between; align-items: center; }
-    .chat-title { font-family: 'Oswald', sans-serif; color: #fff; gap: 8px; display: flex; }
-    .chat-title i { color: var(--accent-cyan); }
-    .chat-close { background: none; border: none; color: #888; cursor: pointer; }
-    .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-    .message { max-width: 85%; padding: 10px 14px; border-radius: 12px; font-size: 0.9rem; line-height: 1.4; }
-    .bot-message { background: rgba(255, 255, 255, 0.05); border-left: 3px solid var(--accent-cyan); color: #eee; align-self: flex-start; }
-    .user-message { background: var(--accent-cyan); color: #000; align-self: flex-end; font-weight: 500; }
-    .chat-input-area { padding: 15px; background: #080808; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
-    #user-input { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid #333; border-radius: 20px; padding: 10px 15px; color: #fff; outline: none; }
-    #user-input:focus { border-color: var(--accent-cyan); }
-    #send-btn { background: transparent; border: none; color: var(--accent-cyan); font-size: 1.2rem; cursor: pointer; }
-    
-    @media(max-width: 678px) {
-        header { padding: 0 20px; }
-        header nav a b { display: none; } 
-    }
-    @media(max-width: 480px){ #chat-window { width: 300px; right: -10px; }}
 </style>

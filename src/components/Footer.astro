@@ -1,16 +1,27 @@
 ---
-import Social from './Social.astro';
+// src/components/Footer.astro
 ---
-<style>
-  footer {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-</style>
-
-<footer>
-  <Social platform="twitter" username="astrodotbuild" />
-  <Social platform="github" username="withastro" />
-  <Social platform="youtube" username="astrodotbuild" />
+<footer class="pie1">
+  <div class="redes">
+    <a href="https://wa.me/543884554173" target="_blank" rel="noopener"><img src="/img/whatsapp.png" alt="Whatsapp"></a>
+    <a href="https://www.instagram.com/fernando_tejerina_vilca?igsh=eGc2dTl1YjY3eW44" target="_blank" rel="noopener"><img src="/img/instagram.png" alt="Instagram"></a>
+    <a href="https://x.com/fernando6507995" target="_blank" rel="noopener"><img src="/img/x.png" alt="X"></a>
+    <a href="https://www.facebook.com/Fernando.Vilca009/" target="_blank" rel="noopener"><img src="/img/facebook.png" alt="Facebook"></a>
+  </div>
+  <div class="derechos">
+    <p>&copy; 2026 | Munay Puna. Todos los derechos reservados.</p>
+  </div>
 </footer>
+
+<style>
+    .pie1 {
+        background-color: #080808; border-top: 1px solid var(--border-color);
+        padding: 1.5rem 3rem; display: flex; flex-wrap: wrap;
+        justify-content: space-between; align-items: center;
+        position: relative; z-index: 10;
+    }
+    .redes { display: flex; align-items: center; gap: 25px; }
+    .redes img { width: 28px; height: 28px; object-fit: contain; filter: grayscale(100%) brightness(1.5); opacity: 0.7; transition: 0.3s; }
+    .redes a:hover img { transform: scale(1.2) rotate(10deg); filter: grayscale(0%) drop-shadow(0 0 5px var(--accent-cyan)); opacity: 1; }
+    .derechos p { margin: 0; color: #666; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
+</style>
